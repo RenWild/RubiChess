@@ -210,6 +210,7 @@ void registerallevals(chessposition *pos)
 
     tuneIt = true;
     registertuner(pos, &eps.eRooksconnected, "eRooksconnected", 0, 0, 0, 0, tuneIt);
+    registertuner(pos, &eps.eQueensupportsrook, "eQueensupportsrook", 0, 0, 0, 0, tuneIt);
 
     tuneIt = false;
     registertuner(pos, &eps.eRookon7thbonus, "eRookon7thbonus", 0, 0, 0, 0, tuneIt);
@@ -563,9 +564,17 @@ int chessposition::getPieceEval(positioneval *pe)
             }
 
             // bonus for rooks connected on same file
-            if (Pt == ROOK && (piece00[WROOK + Me] & filebarrierMask[index][Me] & ROOKATTACKS(occupied, index))) {
-                result += EVAL(eps.eRooksconnected, S2MSIGN(Me));
-                if (bTrace) te.rooks[Me] += EVAL(eps.eRooksconnected, S2MSIGN(Me));
+            if (Pt == ROOK)
+            {
+                U64 rookattacksbb = filebarrierMask[index][You] & ROOKATTACKS(occupied, index);
+                if (rookattacksbb & piece00[WROOK + Me]) {
+                    result += EVAL(eps.eRooksconnected, S2MSIGN(Me));
+                    if (bTrace) te.rooks[Me] += EVAL(eps.eRooksconnected, S2MSIGN(Me));
+                }
+                if (rookattacksbb & piece00[WQUEEN + Me]) {
+                    result += EVAL(eps.eQueensupportsrook, S2MSIGN(Me));
+                    if (bTrace) te.rooks[Me] += EVAL(eps.eQueensupportsrook, S2MSIGN(Me));
+                }
             }
         }
 
