@@ -231,7 +231,7 @@ void transposition::addHash(U64 hash, int val, int16_t staticeval, int bound, in
     transpositionentry *e;
     transpositionentry *leastValuableEntry;
 
-    if (val == 0 && bound == 0)
+    if (val == 0)
         depth /= 2;
 
     for (int i = 0; i < TTBUCKETNUM; i++)
