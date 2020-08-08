@@ -755,11 +755,14 @@ int chessposition::alphabeta(int alpha, int beta, int depth)
             {
                 if (!ISTACTICAL(m->code))
                 {
-                    updateHistory(m->code, ms.cmptr, depth * depth);
-                    for (int i = 0; i < quietsPlayed; i++)
+                    if (quietsPlayed || depth > 2)
                     {
-                        uint32_t qm = quietMoves[i];
-                        updateHistory(qm, ms.cmptr, -(depth * depth));
+                        updateHistory(m->code, ms.cmptr, depth * depth);
+                        for (int i = 0; i < quietsPlayed; i++)
+                        {
+                            uint32_t qm = quietMoves[i];
+                            updateHistory(qm, ms.cmptr, -(depth * depth));
+                        }
                     }
 
                     // Killermove
