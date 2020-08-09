@@ -425,11 +425,11 @@ struct evalparamset {
     eval eKingdangerbyqueen =  SQVALUE(   1,-163);
     eval eKingringattack[6] = {  SQVALUE(   1, 111), SQVALUE(   1,   0), SQVALUE(   1,  31), SQVALUE(   1,   0), SQVALUE(   1,   0), SQVALUE(   1, -15)  };
 #else
-    eval eWeakkingringpenalty =  SQVALUE(   1,  68);
-    eval eKingattackweight[7] = {  SQVALUE(   1,   0), SQVALUE(   1,   0), SQVALUE(   1,  24), SQVALUE(   1,  10), SQVALUE(   1,  14), SQVALUE(   1,  40), SQVALUE(   1,   0)  };
-    eval eSafecheckbonus[6] = {  SQVALUE(   1,   0), SQVALUE(   1,   0), SQVALUE(   1, 250), SQVALUE(   1,  50), SQVALUE(   1, 200), SQVALUE(   1, 170)  };
-    eval eKingdangerbyqueen =  SQVALUE(   1,-150);
-    eval eKingringattack[6] = {  SQVALUE(   1, 100), SQVALUE(   1,   0), SQVALUE(   1,  28), SQVALUE(   1,   0), SQVALUE(   1,   0), SQVALUE(   1, 0)  };
+    eval eWeakkingringpenalty =  SQVALUE(   1,  65);
+    eval eKingattackweight[7] = {  SQVALUE(   1,   0), SQVALUE(   1,   0), SQVALUE(   1,  22), SQVALUE(   1,   9), SQVALUE(   1,  12), SQVALUE(   1,  37), SQVALUE(   1,   0)  };
+    eval eSafecheckbonus[6] = {  SQVALUE(   1,   0), SQVALUE(   1,   0), SQVALUE(   1, 230), SQVALUE(   1,  45), SQVALUE(   1, 200), SQVALUE(   1, 170)  };
+    eval eKingdangerbyqueen =  SQVALUE(   1,-140);
+    eval eKingringattack[6] = {  SQVALUE(   1, 90), SQVALUE(   1,   0), SQVALUE(   1,  25), SQVALUE(   1,   0), SQVALUE(   1,   0), SQVALUE(   1, 0)  };
 #endif
     eval ePsqt[7][64] = {
         {  VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0),
