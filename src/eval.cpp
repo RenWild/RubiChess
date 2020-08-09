@@ -663,37 +663,44 @@ int chessposition::getLateEval(positioneval *pe)
         if (bTrace) te.ppawns[Me] += EVAL(eps.ePassedpawnbonus[(targetsafe << 1) + targetoccupied][RRANK(index, Me)], S2MSIGN(Me));
     }
 
-    // King safety; calculate the danger for my king
-    int kingdanger = SQEVAL(eps.eKingringattack[POPCOUNT(kingdangerMask[kingpos[Me]][Me]) - 4], pe->kingringattacks[You], You);
+    if (ph < 210)
+    {
+        // King safety; calculate the danger for my king
+        int kingdanger = SQEVAL(eps.eKingringattack[POPCOUNT(kingdangerMask[kingpos[Me]][Me]) - 4], pe->kingringattacks[You], You);
 
-    // My attacked and poorly defended squares
-    U64 myweaksquares = attackedBy[You][0]
-        & ~attackedBy2[Me]
-        & (~attackedBy[Me][0] | attackedBy[Me][KING] | attackedBy[Me][QUEEN]);
+        // My attacked and poorly defended squares
+        U64 myweaksquares = attackedBy[You][0]
+            & ~attackedBy2[Me]
+            & (~attackedBy[Me][0] | attackedBy[Me][KING] | attackedBy[Me][QUEEN]);
 
-    // Your safe target squares
-    U64 yoursafetargets = (~attackedBy[Me][0] | (myweaksquares & attackedBy2[You])) & ~occupied00[You];
+        // Your safe target squares
+        U64 yoursafetargets = (~attackedBy[Me][0] | (myweaksquares & attackedBy2[You])) & ~occupied00[You];
 
-    // penalty for weak squares in our king ring
-    kingdanger += SQEVAL(eps.eWeakkingringpenalty, POPCOUNT(myweaksquares & kingdangerMask[kingpos[Me]][Me]), You);
+        // penalty for weak squares in our king ring
+        kingdanger += SQEVAL(eps.eWeakkingringpenalty, POPCOUNT(myweaksquares & kingdangerMask[kingpos[Me]][Me]), You);
 
-    // Safe checks and attacks to king area
-    kingdanger += SQEVAL(eps.eKingattackweight[KNIGHT], pe->kingattackpiececount[You][KNIGHT] * pe->kingattackers[You], You);
-    if (pieceMovesTo<KNIGHT>(kingpos[Me]) & attackedBy[You][KNIGHT] & yoursafetargets)
-        kingdanger += SQEVAL(eps.eSafecheckbonus[KNIGHT], 1, You);
-    kingdanger += SQEVAL(eps.eKingattackweight[BISHOP], pe->kingattackpiececount[You][BISHOP] * pe->kingattackers[You], You);
-    if (pieceMovesTo<BISHOP>(kingpos[Me]) & attackedBy[You][BISHOP] & yoursafetargets)
-        kingdanger += SQEVAL(eps.eSafecheckbonus[BISHOP], 1, You);
-    kingdanger += SQEVAL(eps.eKingattackweight[ROOK], pe->kingattackpiececount[You][ROOK] * pe->kingattackers[You], You);
-    if (pieceMovesTo<ROOK>(kingpos[Me]) & attackedBy[You][ROOK] & yoursafetargets)
-        kingdanger += SQEVAL(eps.eSafecheckbonus[ROOK], 1, You);
-    kingdanger += SQEVAL(eps.eKingattackweight[QUEEN], pe->kingattackpiececount[You][QUEEN] * pe->kingattackers[You], You);
-    if (pieceMovesTo<QUEEN>(kingpos[Me]) & attackedBy[You][QUEEN] & yoursafetargets)
-        kingdanger += SQEVAL(eps.eSafecheckbonus[QUEEN], 1, You);
+        // Safe checks and attacks to king area
+        kingdanger += SQEVAL(eps.eKingattackweight[KNIGHT], pe->kingattackpiececount[You][KNIGHT] * pe->kingattackers[You], You);
+        if (pieceMovesTo<KNIGHT>(kingpos[Me]) & attackedBy[You][KNIGHT] & yoursafetargets)
+            kingdanger += SQEVAL(eps.eSafecheckbonus[KNIGHT], 1, You);
+        kingdanger += SQEVAL(eps.eKingattackweight[BISHOP], pe->kingattackpiececount[You][BISHOP] * pe->kingattackers[You], You);
+        if (pieceMovesTo<BISHOP>(kingpos[Me]) & attackedBy[You][BISHOP] & yoursafetargets)
+            kingdanger += SQEVAL(eps.eSafecheckbonus[BISHOP], 1, You);
+        kingdanger += SQEVAL(eps.eKingattackweight[ROOK], pe->kingattackpiececount[You][ROOK] * pe->kingattackers[You], You);
+        if (pieceMovesTo<ROOK>(kingpos[Me]) & attackedBy[You][ROOK] & yoursafetargets)
+            kingdanger += SQEVAL(eps.eSafecheckbonus[ROOK], 1, You);
+        kingdanger += SQEVAL(eps.eKingattackweight[QUEEN], pe->kingattackpiececount[You][QUEEN] * pe->kingattackers[You], You);
+        if (pieceMovesTo<QUEEN>(kingpos[Me]) & attackedBy[You][QUEEN] & yoursafetargets)
+            kingdanger += SQEVAL(eps.eSafecheckbonus[QUEEN], 1, You);
 
-    kingdanger += SQEVAL(eps.eKingdangerbyqueen, !piece00[WQUEEN | You], You);
-    result += SQRESULT(kingdanger, You);
-    if (bTrace) te.kingattackpower[You] += SQRESULT(kingdanger, You);
+        kingdanger += SQEVAL(eps.eKingdangerbyqueen, !piece00[WQUEEN | You], You);
+        if (kingdanger > 0)
+        {
+            int r = ((kingdanger * kingdanger) & 0xffffff) * S2MSIGN(You) / 2048;
+            result += VALUE(r, r);
+            //if (bTrace) te.kingattackpower[You] += SQRESULT(kingdanger, You);
+        }
+    }
 
     // Threats
     U64 hisNonPawns = occupied00[You] ^ piece00[WPAWN + You];
