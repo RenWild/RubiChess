@@ -391,35 +391,35 @@ struct evalparamset {
     eval eDoublebishopbonus =  VALUE(  56,  38);
     eval ePawnblocksbishoppenalty =  VALUE( -10, -18);
     eval eBishopcentercontrolbonus =  VALUE(  25,  13);
-    eval eKnightOutpost =  VALUE(   15,  15);
+    eval eKnightOutpost =  VALUE(  15,  15);
     eval eMobilitybonus[4][28] = {
-        {  VALUE(  16, -90), VALUE(  38, -26), VALUE(  51,   1), VALUE(  57,  13), VALUE(  64,  27), VALUE(  71,  37), VALUE(  77,  36), VALUE(  84,  36),
-           VALUE(  86,  30), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0),
+        {  VALUE( -11,   2), VALUE(  41,  18), VALUE(  61,  51), VALUE(  71,  61), VALUE(  78,  77), VALUE(  82,  86), VALUE(  91,  89), VALUE( 100,  90),
+           VALUE(  98,  93), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0),
            VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0),
            VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0)  },
-        {  VALUE(  -8, -25), VALUE(  23,  -7), VALUE(  45,   2), VALUE(  55,  21), VALUE(  65,  31), VALUE(  74,  35), VALUE(  80,  43), VALUE(  81,  50),
-           VALUE(  86,  51), VALUE(  85,  58), VALUE(  86,  52), VALUE(  95,  55), VALUE( 100,  54), VALUE(  89,  60), VALUE(   0,   0), VALUE(   0,   0),
+        {  VALUE(   3,  29), VALUE(  34,  35), VALUE(  55,  55), VALUE(  65,  73), VALUE(  75,  81), VALUE(  83,  88), VALUE(  87,  95), VALUE(  90, 100),
+           VALUE(  93, 103), VALUE(  93, 113), VALUE(  93, 106), VALUE( 110, 105), VALUE( 109, 105), VALUE(  94, 112), VALUE(   0,   0), VALUE(   0,   0),
            VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0),
            VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0)  },
-        {  VALUE( -57,  11), VALUE(  14,  17), VALUE(  31,  57), VALUE(  34,  70), VALUE(  36,  82), VALUE(  38,  90), VALUE(  40,  92), VALUE(  46,  96),
-           VALUE(  47, 101), VALUE(  50, 111), VALUE(  54, 109), VALUE(  50, 115), VALUE(  49, 118), VALUE(  50, 116), VALUE(  44, 116), VALUE(   0,   0),
+        {  VALUE( -40,  84), VALUE(  24, 137), VALUE(  44, 171), VALUE(  46, 184), VALUE(  48, 184), VALUE(  46, 199), VALUE(  53, 202), VALUE(  54, 207),
+           VALUE(  59, 209), VALUE(  65, 218), VALUE(  63, 226), VALUE(  70, 229), VALUE(  70, 234), VALUE(  81, 228), VALUE(  67, 239), VALUE(   0,   0),
            VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0),
            VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0), VALUE(   0,   0)  },
-        {  VALUE(-4097,  83), VALUE(  13,-157), VALUE(  -2,  31), VALUE(   3,  75), VALUE(   5,  94), VALUE(   4, 152), VALUE(   6, 161), VALUE(  11, 177),
-           VALUE(  10, 192), VALUE(  15, 187), VALUE(  14, 212), VALUE(  17, 213), VALUE(  16, 227), VALUE(  18, 229), VALUE(  17, 242), VALUE(  19, 251),
-           VALUE(  20, 253), VALUE(  21, 256), VALUE(  18, 263), VALUE(  13, 270), VALUE(  45, 244), VALUE(  67, 233), VALUE(  72, 241), VALUE(  80, 230),
-           VALUE(  69, 264), VALUE( 108, 231), VALUE( 107, 230), VALUE( 114, 198)  }
+        {  VALUE(-150,   0), VALUE(-101, 288), VALUE( -45, 365), VALUE(   5, 293), VALUE( -10, 431), VALUE(   9, 397), VALUE(   1, 470), VALUE(   8, 458),
+           VALUE(  13, 465), VALUE(  14, 473), VALUE(  15, 481), VALUE(  19, 483), VALUE(  17, 494), VALUE(  20, 495), VALUE(  22, 504), VALUE(  21, 507),
+           VALUE(  20, 515), VALUE(  20, 519), VALUE(  15, 528), VALUE(  21, 527), VALUE(  27, 517), VALUE(  31, 531), VALUE(  26, 528), VALUE(  33, 522),
+           VALUE( -17, 564), VALUE( 118, 494), VALUE( 160, 417), VALUE( 398, 357)  }
     };
     eval eRookon7thbonus =  VALUE(  -1,  22);
-    eval eRookonkingarea =  VALUE(   7,  -6);
-    eval eBishoponkingarea =  VALUE(  10,   2);
+    eval eRookonkingarea =  VALUE(  10, -13);
+    eval eBishoponkingarea =  VALUE(  11,   4);
     eval eQueenattackedbysliderpenalty =  VALUE( -30,  17);
     eval eMinorbehindpawn[6] = {  VALUE(   1,  14), VALUE(  12,  10), VALUE(  15,  11), VALUE(  24,   9), VALUE(  37,  11), VALUE(  89, 110)  };
-    eval eSlideronfreefilebonus[2] = {  VALUE(  21,   7), VALUE(  43,   1)  };
+    eval eSlideronfreefilebonus[2] = {  VALUE(  20,  -3), VALUE(  48,  -3)  };
     eval eMaterialvalue[7] = {  VALUE(   0,   0), VALUE( 100, 100), VALUE( 314, 314), VALUE( 314, 314), VALUE( 483, 483), VALUE( 913, 913), VALUE(   0,   0)  };
     eval eKingshieldbonus =  VALUE(  15,  -2);
-    eval eWeakkingringpenalty =  SQVALUE(   1,  70);
-    eval eKingattackweight[7] = {  SQVALUE(   1,   0), SQVALUE(   1,   0), SQVALUE(   1,  25), SQVALUE(   1,  11), SQVALUE(   1,  15), SQVALUE(   1,  42), SQVALUE(   1,   0)  };
+    eval eWeakkingringpenalty =  SQVALUE(   1,  74);
+    eval eKingattackweight[7] = {  SQVALUE(   1,   0), SQVALUE(   1,   0), SQVALUE(   1,  35), SQVALUE(   1,  11), SQVALUE(   1,  15), SQVALUE(   1,  42), SQVALUE(   1,   0)  };
     eval eSafecheckbonus[6] = {  SQVALUE(   1,   0), SQVALUE(   1,   0), SQVALUE(   1, 282), SQVALUE(   1,  55), SQVALUE(   1, 244), SQVALUE(   1, 210)  };
     eval eKingdangerbyqueen =  SQVALUE(   1,-163);
     eval eKingringattack[6] = {  SQVALUE(   1, 111), SQVALUE(   1,   0), SQVALUE(   1,  31), SQVALUE(   1,   0), SQVALUE(   1,   0), SQVALUE(   1, -15)  };
