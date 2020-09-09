@@ -116,7 +116,7 @@ int chessposition::getQuiescence(int alpha, int beta, int depth)
     if (noQs)
     {
         // just evaluate and return (for tuning sets with just quiet positions)
-        score = S2MSIGN(state & S2MMASK) * getEval<NOTRACE>();
+        score = getEval<NOTRACE>();
         getPositionTuneSet(&targetpts, &myev[0]);
         copyPositionTuneSet(&targetpts, &myev[0], &this->pts, &this->ev[0]);
         return score;
@@ -152,7 +152,7 @@ int chessposition::getQuiescence(int alpha, int beta, int depth)
     if (!myIsCheck)
     {
 #ifdef EVALTUNE
-        staticeval = S2MSIGN(state & S2MMASK) * getEval<NOTRACE>();
+        staticeval = getEval<NOTRACE>();
 #else
         // get static evaluation of the position
         if (staticeval == NOSCORE)
@@ -160,7 +160,7 @@ int chessposition::getQuiescence(int alpha, int beta, int depth)
             if (movestack[mstop - 1].movecode == 0)
                 staticeval = -staticevalstack[mstop - 1] + CEVAL(eps.eTempo, 2);
             else
-                staticeval = S2MSIGN(state & S2MMASK) * getEval<NOTRACE>();
+                staticeval = getEval<NOTRACE>();
         }
 #endif
 
@@ -405,7 +405,7 @@ int chessposition::alphabeta(int alpha, int beta, int depth)
             // just reverse the staticeval before the null move respecting the tempo
             staticeval = -staticevalstack[mstop - 1] + CEVAL(eps.eTempo, 2);
         else
-            staticeval = S2MSIGN(state & S2MMASK) * getEval<NOTRACE>();
+            staticeval = getEval<NOTRACE>();
     }
     staticevalstack[mstop] = staticeval;
 
@@ -460,13 +460,10 @@ int chessposition::alphabeta(int alpha, int beta, int depth)
 
         if (score >= beta)
         {
-            if (MATEFORME(score))
-                score = beta;
-
             if (abs(beta) < 5000 && (depth < 12 || nullmoveply)) {
                 STATISTICSINC(prune_nm);
                 SDEBUGDO(isDebugPv, pvabortval[ply] = score; pvaborttype[ply] = PVA_NMPRUNED;);
-                return score;
+                return beta;
             }
             // Verification search
             nullmoveply = ply + 3 * (depth - R) / 4;
@@ -476,7 +473,7 @@ int chessposition::alphabeta(int alpha, int beta, int depth)
             if (verificationscore >= beta) {
                 STATISTICSINC(prune_nm);
                 SDEBUGDO(isDebugPv, pvabortval[ply] = score; pvaborttype[ply] = PVA_NMPRUNED;);
-                return score;
+                return beta;
             }
         }
     }
@@ -518,14 +515,10 @@ int chessposition::alphabeta(int alpha, int beta, int depth)
     }
 
 
-    // Internal iterative deepening 
-    const int iidmin = 3;
-    const int iiddelta = 2;
-    if (PVNode && !hashmovecode && depth >= iidmin)
-    {
-        alphabeta(alpha, beta, depth - iiddelta);
-        hashmovecode = tp.getMoveCode(newhash);
-    }
+    if (PVNode && !hashmovecode && depth >= 3)
+        // PV node and no best move from hash
+        // Instead of iid the idea of Ed Schroeder to just decrease depth works well
+        depth--;
 
     // Get possible countermove from table
     uint32_t lastmove = movestack[mstop - 1].movecode;
@@ -911,7 +904,7 @@ int chessposition::rootsearch(int alpha, int beta, int depth, int inWindowLast)
 
     // get static evaluation of the position
     if (staticeval == NOSCORE)
-        staticeval = S2MSIGN(state & S2MMASK) * getEval<NOTRACE>();
+        staticeval = getEval<NOTRACE>();
     staticevalstack[mstop] = staticeval;
 
     int quietsPlayed = 0;

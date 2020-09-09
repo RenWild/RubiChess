@@ -17,7 +17,7 @@
 
 #pragma once
 
-#define VERNUM "1.8"
+#define VERNUM "1.9"
 //#define VERSTABLE
 
 #if 0
@@ -42,6 +42,10 @@
 
 #if 0
 #define FINDMEMORYLEAKS
+#endif
+
+#if 1
+#define NNUE
 #endif
 
 #ifdef FINDMEMORYLEAKS
@@ -135,20 +139,22 @@ using namespace std;
 #endif
 #endif
 
-#define CPULEGACY   0
-#define CPUPOPCOUNT 1
-#define CPUBMI2     2
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
 
 #define CPUVENDORUNKNOWN    0
 #define CPUVENDORINTEL      1
 #define CPUVENDORAMD        2
 
-#ifndef CPUFEATURE
-#ifdef _MSC_VER
-#define CPUFEATURE CPUPOPCOUNT
+
+#if defined(__clang_major__)
+#define COMPILER "Clang " TOSTRING(__clang_major__)
+#elif defined(__GNUC__)
+#define COMPILER "GCC " TOSTRING(__GNUC__)
+#elif defined(_MSC_VER)
+#define COMPILER "MSVC " TOSTRING(_MSC_VER)
 #else
-#define CPUFEATURE CPULEGACY
-#endif
+#define COMPILER "unknown compiler"
 #endif
 
 #ifndef VERSTABLE
@@ -162,15 +168,15 @@ using namespace std;
 #endif
 #define ENGINEVER "RubiChess " VERSION
 #ifdef GITID
-#define BUILD __DATE__ " " __TIME__ " commit " GITID
+#define BUILD __DATE__ " " __TIME__ " commit " GITID " " COMPILER
 #else
-#define BUILD __DATE__ " " __TIME__
+#define BUILD __DATE__ " " __TIME__ " " COMPILER
 #endif
 
 #define BITSET(x) (1ULL << (x))
 #define MORETHANONE(x) ((x) & ((x) - 1)) 
 #define ONEORZERO(x) (!MORETHANONE(x))
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #define GETLSB(i,x) _BitScanForward64((DWORD*)&(i), (x))
 inline int pullLsb(unsigned long long *x) {
     DWORD i;
@@ -231,6 +237,9 @@ enum { WHITE, BLACK };
 
 typedef unsigned long long U64;
 typedef signed long long S64;
+
+typedef unsigned int PieceCode;
+typedef unsigned int PieceType;
 
 // Forward definitions
 class transposition;
@@ -568,6 +577,126 @@ extern int tuningratio;
 
 #endif
 
+//
+// NNUE stuff
+//
+
+#define NNUEFILEVERSION     0x7AF32F16u
+#define NNUENETLAYERHASH    0xCC03DAE4u
+#define NNUECLIPPEDRELUHASH 0x538D24C7u
+#define NNUEFEATUREHASH     (0x5D69D5B9u ^ true)
+#define NNUEINPUTSLICEHASH  0xEC42E90Du
+
+#define ORIENT(c,i) ((c) ? (i) ^ 0x3f : (i))
+#define MAKEINDEX(c,s,p,k) (ORIENT(c, s) + PieceToIndex[c][p] + PS_END * (k))
+
+
+const int NnueFtHalfdims = 256;
+const int NnueFtOutputdims = NnueFtHalfdims * 2;
+const int NnueFtInputdims = 64 * 641;
+const int NnueClippingShift = 6;
+const int NnueValueScale = 16;
+
+#if (defined(USE_SSE2) || defined(USE_MMX)) && !defined(USE_SSSE3)
+// FIXME: This is not implemented yet
+typedef int16_t clipped_t;
+typedef int16_t weight_t;
+#else
+typedef int8_t weight_t;
+typedef int8_t clipped_t;
+#endif
+
+// All pieces besides kings are inputs => 30 dimensions
+typedef struct {
+    size_t size;
+    unsigned values[30];
+} NnueIndexList;
+
+typedef struct {
+    int dirtyNum;
+    PieceCode pc[3];
+    int from[3];
+    int to[3];
+} DirtyPiece;
+
+
+extern bool NnueReady;
+
+
+class NnueLayer
+{
+public:
+    NnueLayer* previous;
+
+    NnueLayer(NnueLayer* prev) { previous = prev; }
+    virtual bool ReadWeights(ifstream* is) = 0;
+    virtual uint32_t GetHash() = 0;
+};
+
+class NnueFeatureTransformer : public NnueLayer
+{
+public:
+    int16_t* bias;
+    int16_t* weight;
+
+    NnueFeatureTransformer();
+    virtual ~NnueFeatureTransformer();
+    bool ReadWeights(ifstream* is);
+    uint32_t GetHash();
+};
+
+class NnueClippedRelu : public NnueLayer
+{
+public:
+    int dims;
+    NnueClippedRelu(NnueLayer* prev, int d);
+    virtual ~NnueClippedRelu() {};
+    bool ReadWeights(ifstream* is);
+    uint32_t GetHash();
+    void Propagate(int32_t *input, clipped_t *output);
+};
+
+class NnueInputSlice : public NnueLayer
+{
+public:
+    const int outputdims = 512;
+
+    NnueInputSlice();
+    virtual ~NnueInputSlice() {};
+    bool ReadWeights(ifstream* is);
+    uint32_t GetHash();
+};
+
+class NnueNetworkLayer : public NnueLayer
+{
+public:
+    int inputdims;
+    int outputdims;
+
+    int32_t* bias;
+    int8_t* weight;
+
+    NnueNetworkLayer(NnueLayer* prev, int id, int od);
+    virtual ~NnueNetworkLayer();
+    bool ReadWeights(ifstream* is);
+    uint32_t GetHash();
+    void Propagate(clipped_t *input, int32_t *output);
+};
+
+class NnueAccumulator
+{
+public:
+    alignas(64) int16_t accumulation[2][256];
+    int score;
+    int computationState;
+};
+
+
+void NnueInit();
+void NnueRemove();
+void NnueReadNet(string path);
+
+
 
 //
 // transposition stuff
@@ -725,7 +854,6 @@ extern transposition tp;
 
 #define BUFSIZE 4096
 
-#define PieceType unsigned int
 #define BLANKTYPE 0
 #define PAWN 1
 #define KNIGHT 2
@@ -734,7 +862,6 @@ extern transposition tp;
 #define QUEEN 5
 #define KING 6
 
-#define PieceCode unsigned int
 #define BLANK 0
 #define WPAWN 2
 #define BPAWN 3
@@ -1044,7 +1171,7 @@ extern SMagic mRookTbl[64];
 #define BISHOPINDEXBITS 9
 #define ROOKINDEXBITS 12
 
-#if CPUFEATURE == CPUBMI2
+#ifdef USE_BMI2
 #include <immintrin.h>
 #define BISHOPINDEX(occ,i) (int)(_pext_u64(occ, mBishopTbl[i].mask))
 #define ROOKINDEX(occ,i) (int)(_pext_u64(occ, mRookTbl[i].mask))
@@ -1178,7 +1305,10 @@ public:
     U64 he_all;
     Materialhash mtrlhsh;
     Pawnhash pwnhsh;
-
+#ifdef NNUE
+    NnueAccumulator accumulator[MAXDEPTH];
+    DirtyPiece dirtypiece[MAXDEPTH];
+#endif
     bool w2m();
     void BitboardSet(int index, PieceCode p);
     void BitboardClear(int index, PieceCode p);
@@ -1236,6 +1366,16 @@ public:
 #endif
     int testRepetiton();
     void mirror();
+#ifdef NNUE
+    void HalfkpAppendActiveIndices(int c, NnueIndexList *active);
+    void AppendActiveIndices(NnueIndexList active[2]);
+    void HalfkpAppendChangedIndices(int c, NnueIndexList *add, NnueIndexList *remove);
+    void AppendChangedIndices(NnueIndexList add[2], NnueIndexList remove[2], bool reset[2]);
+    void RefreshAccumulator();
+    bool UpdateAccumulator();
+    void Transform(clipped_t *output);
+    int NnueGetEval();
+#endif
 };
 
 //
@@ -1301,12 +1441,58 @@ typedef map<string, ucioption_t>::iterator optionmapiterator;
 #define NODESPERCHECK 0xfff
 enum ponderstate_t { NO, PONDERING, HITPONDER };
 
+
+#define CPUMMX      (1 << 0)
+#define CPUSSE2     (1 << 1)
+#define CPUSSSE3    (1 << 2)
+#define CPUPOPCNT   (1 << 3)
+#define CPUAVX2     (1 << 4)
+#define CPUBMI2     (1 << 5)
+
+#define STRCPUFEATURELIST  { "mmx","sse2","ssse3","popcnt","avx2","bmi2" }
+
+
+extern const string strCpuFeatures[];
+
+class compilerinfo
+{
+public:
+    const U64 binarySupports = 0ULL
+#ifdef USE_POPCNT
+        | CPUPOPCNT
+#endif
+#ifdef USE_MMX
+        | CPUMMX
+#endif
+#ifdef USE_SSE2
+        | CPUSSE2
+#endif
+#ifdef USE_SSSE3
+        | CPUSSSE3
+#endif
+#ifdef USE_AVX2
+        | CPUAVX2
+#endif
+#ifdef USE_BMI2
+        | CPUBMI2
+#endif
+        ;
+
+    U64 machineSupports;
+    string system;
+    int cpuVendor;
+    compilerinfo();
+    void GetSystemInfo();
+    string SystemName();
+    string PrintCpuFeatures(U64 features, bool onlyHighest = false);
+};
+
+
 class engine
 {
 public:
-    engine();
+    engine(compilerinfo *c);
     ~engine();
-    const string cpufeature[3] = { "Legacy", "Popcount", "BMI2" };
     const char* author = "Andreas Matthies";
     bool isWhite;
     U64 tbhits;
@@ -1342,10 +1528,7 @@ public:
     int benchdepth;
     string benchmove;
     ucioptions_t ucioptions;
-    string system;
-    int maxHWSupport;
-    int cpuVendor;
-    bool badPEXT;
+    compilerinfo* compinfo;
 
 #ifdef STACKDEBUG
     string assertfile = "";
@@ -1355,8 +1538,13 @@ public:
     int t2stop = 0;     // immediate stop
     bool bStopCount;
 #endif
+#ifdef NNUE
+    string NnueNetpath;
+#endif
+
     string name() {
-        return string(ENGINEVER) + " (" + cpufeature[CPUFEATURE] +")";
+        string sbinary = compinfo->PrintCpuFeatures(compinfo->binarySupports, true);
+        return string(ENGINEVER) + (sbinary != "" ? " (" + sbinary + ")" : "");
     };
     GuiToken parse(vector<string>*, string ss);
     void send(const char* format, ...);
@@ -1366,7 +1554,6 @@ public:
     long long perft(int depth, bool dotests);
     void prepareThreads();
     void resetStats();
-    void GetSystemInfo();
 };
 
 PieceType GetPieceType(char c);
@@ -1391,6 +1578,7 @@ public:
 };
 
 extern engine en;
+extern compilerinfo cinfo;
 
 #ifdef SDEBUG
 #define SDEBUGDO(c, s) if (c) {s}
@@ -1496,4 +1684,5 @@ void search_statistics();
 #define STATISTICSADD(x, v)
 #define STATISTICSDO(x)
 #endif
+
 
